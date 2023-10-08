@@ -1,4 +1,4 @@
--- {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -30,6 +30,7 @@ import Calligraphy.Phases.DependencyFilter
 import Calligraphy.Phases.EdgeCleanup
 import Calligraphy.Phases.NodeFilter
 import Calligraphy.Phases.Parse
+-- import Calligraphy.Phases.Render
 import Calligraphy.Phases.Render.Common
 import Calligraphy.Phases.Render.GraphViz
 import Calligraphy.Phases.Render.Mermaid
@@ -42,7 +43,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as Text
 import Data.Version (showVersion)
 import Options.Applicative
-import Paths_calligraphy (version)
+-- import Paths_calligraphy (version)
 import System.Directory (findExecutable)
 import System.Exit
 import System.IO (stderr)

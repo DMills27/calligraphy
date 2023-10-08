@@ -1,5 +1,3 @@
-packages:
-  */*.cabal
-
-package calligraphy
-  tests: True
+packages: 
+    ./
+    ./calligraphy-cli

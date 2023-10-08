@@ -72,7 +72,6 @@ library
     , optparse-applicative
     , process
     , text
-    , calligraphy-cli
 
 executable calligraphy
   import:         common-options

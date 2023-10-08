@@ -19,11 +19,6 @@ version:            0.1.0.0
 -- A short (one-line) description of the package.
 synopsis:           A CLI component of Calligraphy
 
--- A longer description of the package.
--- description:
-
--- URL for the project homepage or repository.
-homepage:
 
 -- A URL where users can report bugs.
 -- bug-reports:
@@ -40,16 +35,23 @@ author:             Dominic Mills
 -- An email address to which users can send suggestions, bug reports, and patches.
 maintainer:         dominic.millz27@gmail.com
 
--- A copyright notice.
--- copyright:
--- category:
-
 -- Extra files to be distributed with the package, such as examples or a README.
 extra-source-files: CHANGELOG.md
 
+
+executable  calligraphy-cli
+    main-is: Main.hs
+    build-depends:    base ^>=4.16.4.0
+                    , optparse-applicative ^>=0.17.0.0
+                    , calligraphy ^>= 0.1.6
+                    , process
+                    , text 
+                    , directory
+    hs-source-dirs: src/
+
 library
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules:  Main
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -58,7 +60,14 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16.4.0, calligraphy
+    build-depends:    base ^>=4.16.4.0
+                    , optparse-applicative ^>=0.17.0.0
+                    , process
+                    , text 
+                    , directory
+                    , calligraphy == 0.1.6
+
+                     
 
     -- Directories containing source files.
     hs-source-dirs:   src
