@@ -28,6 +28,7 @@ module Calligraphy.Compat.GHC
     getKey,
     getOccString,
     hieVersion,
+    version,
     initNameCache,
     mkSplitUniqSupply,
     moduleName,
@@ -59,6 +60,7 @@ import GHC.Types.Name
 import GHC.Types.Unique
 import GHC.Types.Unique.Supply
 import GHC.Unit.Types
+import Paths_calligraphy (version)
 #else
 import Avail
 import GHC
@@ -70,4 +72,5 @@ import NameCache
 import SrcLoc
 import UniqSupply
 import Unique
+import Paths_calligraphy (version)
 #endif

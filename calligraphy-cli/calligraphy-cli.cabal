@@ -39,7 +39,7 @@ maintainer:         dominic.millz27@gmail.com
 extra-source-files: CHANGELOG.md
 
 
-executable  calligraphy-cli
+executable calligraphy-cli
     main-is: Main.hs
     build-depends:    base ^>=4.16.4.0
                     , optparse-applicative ^>=0.17.0.0
@@ -48,29 +48,4 @@ executable  calligraphy-cli
                     , text 
                     , directory
     hs-source-dirs: src/
-
-library
-    -- Modules exported by the library.
-    exposed-modules:  Main
-
-    -- Modules included in this library but not exported.
-    -- other-modules:
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-
-    -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16.4.0
-                    , optparse-applicative ^>=0.17.0.0
-                    , process
-                    , text 
-                    , directory
-                    , calligraphy == 0.1.6
-
-                     
-
-    -- Directories containing source files.
-    hs-source-dirs:   src
-
-    -- Base language which the package is written in.
     default-language: Haskell2010
