@@ -3,27 +3,24 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Main
-  (
-    pLocMode, 
-    pRenderConfig,
-    RenderConfig (..),
-    ClusterModules (..),
-    LocMode (..),
-    pGraphVizConfig,
-    GraphVizConfig (..),
-    EdgeCleanupConfig(..),
-    pEdgeCleanupConfig,
-    pDependencyFilterConfig,
+  ( main
+    -- pLocMode, 
+    -- pRenderConfig,
+    -- RenderConfig (..),
+    -- ClusterModules (..),
+    -- LocMode (..),
+    -- pGraphVizConfig,
+    -- GraphVizConfig (..),
+    -- EdgeCleanupConfig(..),
+    -- pEdgeCleanupConfig,
+    -- pDependencyFilterConfig,
   )
  where
 
 import Options.Applicative hiding (style)
 import Data.List.NonEmpty (NonEmpty, nonEmpty)
 import qualified Text.Read.Lex as Optparse
-
--- someFunc :: IO ()
--- someFunc = putStrLn "someFunc"
-
+import Control.Monad (forM_, unless, when)
 import Calligraphy.Compat.Debug (ppHieFile)
 import qualified Calligraphy.Compat.GHC as GHC
 import Calligraphy.Phases.DependencyFilter
@@ -43,7 +40,6 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as Text
 import Data.Version (showVersion)
 import Options.Applicative
--- import Paths_calligraphy (version)
 import System.Directory (findExecutable)
 import System.Exit
 import System.IO (stderr)
@@ -57,7 +53,7 @@ main = do
     versionP =
       infoOption
         ( "calligraphy version "
-            <> showVersion version
+            <> showVersion GHC.version
             <> "\nhie version "
             <> show GHC.hieVersion
         )
@@ -203,25 +199,6 @@ pDebugConfig =
     <*> switch (long "ddump-lexical-tree" <> help "Debug dump the reconstructed lexical structure of HIE files, the intermediate output in the parsing phase.")
     <*> switch (long "ddump-final" <> help "Debug dump the final tree after processing, i.e. as it will be rendered.")
 
-
-
--- Used in GraphViz.hs
-data GraphVizConfig = GraphVizConfig
-  { 
-    showChildArrowhead :: Bool,
-    clusterGroups :: Bool,
-    splines :: Bool,
-    reverseDependencyRank :: Bool
-  }
-
-pGraphVizConfig :: Parser GraphVizConfig
-pGraphVizConfig =
-  GraphVizConfig
-    <$> flag False True (long "show-child-arrowhead" <> help "Put an arrowhead at the end of a parent-child edge")
-    <*> flag True False (long "no-cluster-trees" <> help "Don't draw definition trees as a cluster.")
-    <*> flag True False (long "no-splines" <> help "Render arrows as straight lines instead of splines")
-    <*> flag False True (long "reverse-dependency-rank" <> help "Make dependencies have lower rank than the dependee, i.e. show dependencies above their parent.")
-
 -- Used in Common.hs
 
 data LocMode = Hide | Line | LineCol
@@ -232,92 +209,8 @@ pLocMode =
     <|> flag' LineCol (long "show-line-col" <> help "Show line and column numbers")
     <|> pure Hide
 
-data RenderConfig = RenderConfig
-  { 
-    showCalls :: Bool,
-    showTypes :: Bool,
-    showKey :: Bool,
-    showGHCKeys :: Bool,
-    showModulePath :: Bool,
-    locMode :: LocMode,
-    clusterModules :: ClusterModules
-  }
-
-data ClusterModules
-  = ClusterNever
-  | ClusterWhenMultiple
-  | ClusterAlways
-
-pRenderConfig :: Parser RenderConfig
-pRenderConfig =
-  RenderConfig
-    <$> flag True False (long "hide-calls" <> help "Don't show call arrows")
-    <*> flag True False (long "hide-types" <> help "Don't show type arrows")
-    <*> flag False True (long "show-key" <> help "Show internal keys with identifiers. Useful for debugging.")
-    <*> flag False True (long "show-ghc-key" <> help "Show GHC keys with identifiers. Useful for debugging.")
-    <*> flag False True (long "show-module-path" <> help "Show a module's filepath instead of its name")
-    <*> pLocMode
-    <*> pClusterModules
-
 pClusterModules :: Parser ClusterModules
 pClusterModules =
   flag' ClusterNever (long "no-cluster-modules" <> help "Don't draw modules as a cluster.")
     <|> flag' ClusterAlways (long "force-cluster-modules" <> help "Draw modules as a cluster, even if there is only one.")
     <|> pure ClusterWhenMultiple
-
--- Used in EdgeCleanup.hs
-data EdgeCleanupConfig = EdgeCleanupConfig
-  { 
-    cleanDoubles :: Bool,
-    cleanLoops :: Bool,
-    cleanData :: Bool,
-    cleanClass :: Bool
-  }
-
-pEdgeCleanupConfig :: Parser EdgeCleanupConfig
-pEdgeCleanupConfig =
-  EdgeCleanupConfig
-    <$> flag True False (long "no-clean-double-edges" <> help "Don't remove type edges when value edges already exist.")
-    <*> flag True False (long "no-clean-loops" <> help "Don't remove edges that start and stop at the same node, i.e. simple recursion.")
-    <*> flag True False (long "no-clean-data" <> help "Don't remove type edges constructors/records back to the parent data type. These are removed by default because their behavior is unreliable, and they're generally redundant.")
-    <*> flag True False (long "no-clean-classes" <> help "Don't remove type edges from class members back to the parent class. These are removed by default because their behavior is unreliable, and they're generally redundant.")
-
--- Used in Render.hs
-
--- Used in DependencyFilter.hs
-
-data DependencyFilterConfig = DependencyFilterConfig
-  { 
-    _depRoot :: Maybe (NonEmpty String),
-    _revDepRoot :: Maybe (NonEmpty String),
-    _depDepth :: Maybe Int,
-    _followParent :: Bool,
-    _followChildren :: Bool,
-    _followCalls :: Bool,
-    _followTypes :: Bool
-  }
-
-pDependencyFilterConfig :: Parser DependencyFilterConfig
-pDependencyFilterConfig =
-  DependencyFilterConfig
-    <$> (fmap nonEmpty . many)
-      ( strOption
-          ( long "forward-root"
-              <> short 'f'
-              <> metavar "NAME"
-              <> help "Name of a dependency filter root. Specifying a dependency filter root hides everything that's not a (transitive) dependency of a root. The name can be qualified. This argument can be repeated."
-          )
-      )
-    <*> (fmap nonEmpty . many)
-      ( strOption
-          ( long "reverse-root"
-              <> short 'r'
-              <> metavar "NAME"
-              <> help "Name of a reverse dependency filter root. Specifying a dependency filter root hides everything that's not a reverse (transitive) dependency of a root. The name can be qualified. This argument can be repeated."
-          )
-      )
-    <*> optional (option auto (long "max-depth" <> help "Maximum search depth for transitive dependencies."))
-    <*> boolFlags True "follow-parent" "In calculating (transitive) dependencies, follow edges to from a child to its parent." mempty
-    <*> boolFlags True "follow-child" "In calculating (transitive) dependencies, follow edges from a parent to its children." mempty
-    <*> boolFlags True "follow-value" "In calculating (transitive) dependencies, follow normal edges." mempty
-    <*> boolFlags False "follow-type" "In calculating (transitive) dependencies, follow type edges." mempty
